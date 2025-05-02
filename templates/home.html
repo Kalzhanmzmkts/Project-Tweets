@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            {% if current_user.is_authenticated %}
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Создать твит</h5>
+                    <a href="{{ url_for('new_tweet') }}" class="btn btn-primary btn-sm px-4">✏️ Новый твит</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <h3 class="mb-4 text-center">🌟 Все твиты</h3>
+
+            {% for tweet in tweets %}
+            <div class="card shadow-sm mb-3 border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="fw-bold text-primary">@{{ tweet.author.username }}</div>
+                        <small class="text-muted">{{ tweet.created_at.strftime('%H:%M %d.%m.%Y') }}</small>
+                    </div>
+                    <p class="card-text">{{ tweet.content }}</p>
+
+                    {% if tweet.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + tweet.image) }}" class="img-fluid rounded mb-2">
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between mt-2">
+                        <form method="POST" action="{{ url_for('like_tweet', tweet_id=tweet.id) }}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">❤️ {{ tweet.likes|length }}</button>
+                        </form>
+
+                        {% if tweet.author == current_user %}
+                        <form method="POST" action="{{ url_for('delete_tweet', tweet_id=tweet.id) }}">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">🗑️ Удалить</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center shadow-sm">Пока нет твитов. Будьте первым!</div>
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
