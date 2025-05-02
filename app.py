@@ -31,6 +31,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 migrate = Migrate(app, db)
 
+
 # --- Forms ---
 class RegistrationForm(FlaskForm):
     username = StringField('Имя пользователя', validators=[DataRequired(), Length(min=4, max=20)])
@@ -39,15 +40,18 @@ class RegistrationForm(FlaskForm):
     confirm_password = PasswordField('Подтвердите пароль', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Зарегистрироваться')
 
+
 class LoginForm(FlaskForm):
     username = StringField('Имя пользователя', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[DataRequired()])
     submit = SubmitField('Войти')
 
+
 class TweetForm(FlaskForm):
     content = TextAreaField('Текст твита', validators=[DataRequired(), Length(max=280)])
     image = FileField('Изображение', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения!')])
     submit = SubmitField('Опубликовать')
+
 
 # --- Models ---
 class User(UserMixin, db.Model):
@@ -55,7 +59,6 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    profile_image = db.Column(db.String(100))
     tweets = db.relationship('Tweet', backref='author', lazy=True)
 
     def set_password(self, password):
@@ -63,6 +66,7 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
 
 class Tweet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -72,16 +76,19 @@ class Tweet(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     likes = db.relationship('Like', backref='tweet', lazy=True, cascade='all, delete-orphan')
 
+
 class Like(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     tweet_id = db.Column(db.Integer, db.ForeignKey('tweet.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
 # --- Login Manager ---
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 # --- Before Request ---
 @app.before_request
@@ -90,9 +97,11 @@ def update_last_seen():
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
 
+
 # --- Helpers ---
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
 
 def save_uploaded_file(file):
     if file and allowed_file(file.filename):
@@ -102,29 +111,40 @@ def save_uploaded_file(file):
         return filename
     return None
 
+
 # --- Routes ---
 @app.route('/')
 def home():
     tweets = Tweet.query.order_by(Tweet.created_at.desc()).all()
     return render_template('home.html', tweets=tweets)
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
+
     form = RegistrationForm()
+
     if form.validate_on_submit():
+        existing_user = User.query.filter_by(username=form.username.data).first()
+        if existing_user:
+            flash('Имя пользователя уже существует. Пожалуйста, выберите другое.', 'danger')
+            return redirect(url_for('register'))
+
         user = User(
             username=form.username.data,
-            email=form.email.data,
-            profile_image=None
+            email=form.email.data
         )
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
+
         flash('Регистрация прошла успешно!', 'success')
         return redirect(url_for('login'))
+
     return render_template('register.html', form=form)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -140,6 +160,7 @@ def login():
         flash('Неверное имя пользователя или пароль', 'danger')
     return render_template('login.html', form=form)
 
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -147,11 +168,13 @@ def logout():
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('home'))
 
+
 @app.route('/profile')
 @login_required
 def profile():
     tweets = Tweet.query.filter_by(user_id=current_user.id).order_by(Tweet.created_at.desc()).all()
     return render_template('profile.html', tweets=tweets)
+
 
 @app.route('/tweet/new', methods=['GET', 'POST'])
 @login_required
@@ -165,6 +188,7 @@ def new_tweet():
         flash('Твит создан!', 'success')
         return redirect(url_for('home'))
     return render_template('create_tweet.html', form=form)
+
 
 @app.route('/tweet/<int:tweet_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -189,6 +213,7 @@ def edit_tweet(tweet_id):
         form.content.data = tweet.content
     return render_template('edit_tweet.html', form=form, tweet=tweet)
 
+
 @app.route('/tweet/<int:tweet_id>/delete', methods=['POST'])
 @login_required
 def delete_tweet(tweet_id):
@@ -204,6 +229,7 @@ def delete_tweet(tweet_id):
     db.session.commit()
     flash('Твит удален!', 'success')
     return redirect(url_for('profile'))
+
 
 @app.route('/tweet/<int:tweet_id>/like', methods=['POST'])
 @login_required
@@ -221,14 +247,17 @@ def like_tweet(tweet_id):
     db.session.commit()
     return redirect(request.referrer or url_for('home'))
 
+
 # --- Error Handlers ---
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
+
 @app.errorhandler(403)
 def forbidden(e):
     return render_template('403.html'), 403
+
 
 # --- Run App ---
 if __name__ == '__main__':
