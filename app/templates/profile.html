@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="fw-bold text-primary">@{{ current_user.username }}</h4>
+                    <p class="text-muted">{{ current_user.email }}</p>
+                    <a href="{{ url_for('tweets.new_tweet') }}" class="btn btn-primary mt-3">Новый твит</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4 border-1" style="padding: 2vh 2vh">
+                <h3>Мои твиты</h3>
+                {% for tweet in tweets %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <small class="text-muted">{{ tweet.created_at.strftime('%H:%M %d.%m.%Y') }}</small>
+                            </div>
+                            <div>
+                                <a href="{{ url_for('tweets.view_tweet', tweet_id=tweet.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    💬 Комментарии ({{ tweet.comments|length }})
+                                </a>
+                                <a href="{{ url_for('tweets.edit_tweet', tweet_id=tweet.id) }}"
+                                   class="btn btn-sm btn-outline-secondary">Изменить</a>
+                                <form method="POST" action="{{ url_for('tweets.delete_tweet', tweet_id=tweet.id) }}"
+                                      class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                </form>
+                            </div>
+                        </div>
+                        <p class="card-text mt-2">{{ tweet.content }}</p>
+                        {% if tweet.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + tweet.image) }}"
+                             class="img-fluid rounded mb-2">
+                        {% endif %}
+                        <div class="mt-2">
+                        <span class="text-muted">
+                            ❤️ {{ tweet.likes|length }} лайков
+                        </span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info">У вас пока нет твитов</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

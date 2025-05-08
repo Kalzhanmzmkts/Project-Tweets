@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- Карточка твита -->
+            <div class="card shadow-sm mb-4 border-1" style="padding: 2vh 2vh">
+
+                <h4 class="fw-bold text-primary">@{{ tweet.author.username }}</h4>
+                <p class="card-text">{{ tweet.content }}</p>
+                {% if tweet.image %}
+
+                <img src="{{ url_for('static', filename='uploads/' + tweet.image) }}"
+                     class="img-fluid rounded mb-2" alt="Изображение твита">
+                {% endif %}
+
+                <div class="d-flex justify-content-between mt-2">
+                    <form method="POST" action="{{ url_for('tweets.like_tweet', tweet_id=tweet.id) }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            ❤️ {{ tweet.likes|length }}
+                        </button>
+                    </form>
+                    <a href="{{ url_for('main.home') }}" class="btn btn-secondary mt-3">Назад</a>
+                </div>
+            </div>
+
+            <!-- Комментарии -->
+            <div class="card shadow-sm mb-4 border-1" style="padding: 2vh 2vh">
+                <div class="comments-section">
+                    <h5 class="mb-3">Комментарии:</h5>
+                    {% if tweet.comments %}
+                    {% for comment in tweet.comments %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <small class="fw-bold text-primary">@{{ comment.user.username }}</small>
+                                </div>
+                                <div>
+                                    <small class="text-muted">{{ comment.created_at.strftime('%H:%M %d.%m.%Y')
+                                        }}</small>
+                                </div>
+                                <div>
+                                    {% if comment.user_id == current_user.id or tweet.author_id == current_user.id %}
+                                    <form method="POST"
+                                          action="{{ url_for('tweets.delete_comment', tweet_id=tweet.id, comment_id=comment.id) }}"
+                                          class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <p class="card-text mt-2">{{ comment.content }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% else %}
+                    <p class="alert alert-info">Нет комментариев. Будьте первым!</p>
+                    {% endif %}
+                </div>
+
+                <!-- Форма для добавления комментария -->
+                {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('tweets.view_tweet', tweet_id=tweet.id) }}" class="mt-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="content" placeholder="Напишите комментарий..."
+                               required>
+                        <button class="btn btn-primary" type="submit">Отправить</button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
