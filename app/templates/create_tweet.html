@@ -5,11 +5,13 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4>Новый твит</h4>
+                    <h4>New Tweet</h4>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="" enctype="multipart/form-data">
                         {{ form.hidden_tag() }}
+
+                        <!-- Content Field -->
                         <div class="form-group mb-3">
                             {{ form.content.label(class="form-label") }}
                             {{ form.content(class="form-control", rows=4) }}
@@ -17,16 +19,34 @@
                             <div class="invalid-feedback d-block">{{ error }}</div>
                             {% endfor %}
                         </div>
+
+                        <!-- Image Field -->
                         <div class="form-group mb-3">
                             {{ form.image.label(class="form-label") }}
                             {{ form.image(class="form-control") }}
-                            <small class="text-muted">Максимальный размер файла: 2MB</small>
+                            <small class="text-muted">Maximum file size: 2MB</small>
+                            {% for error in form.image.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
                         </div>
+
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Опубликовать</button>
-                            <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">Отмена</a>
+                            <button type="submit" class="btn btn-primary">Post</button>
+                            <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
+
+                    <!-- Flash messages for other errors -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
                 </div>
             </div>
         </div>

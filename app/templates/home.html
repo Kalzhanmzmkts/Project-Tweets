@@ -8,55 +8,126 @@
             {% if current_user.is_authenticated %}
             <div class="card shadow-sm mb-4 border-1">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Создать твит</h5>
-                    <a href="{{ url_for('tweets.new_tweet') }}" class="btn btn-primary btn-sm px-4">✏️ Новый твит</a>
+                    <h5 class="card-title mb-3">Create Tweet</h5>
+                    <a href="{{ url_for('tweets.new_tweet') }}" class="btn btn-primary btn-sm px-4">
+                        ✏️ New Tweet
+                    </a>
                 </div>
             </div>
             {% endif %}
 
-            <div class="card shadow-sm mb-4 border-1" style="padding: 2vh 2vh">
-                <h3 class="mb-4 text-center">🌟 Все твиты</h3>
+            <div class="card shadow-sm mb-4 border-1" style="padding: 2vh 2vh;">
+                <h3 class="mb-4 text-center">🌟 All Tweets</h3>
 
-                <!-- Поиск твитов -->
-                <form method="GET" action="{{ url_for('main.home') }}" class="mb-3">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="q" placeholder="Поиск твитов или @автора..."
-                               value="{{ request.args.get('q', '') }}">
-                        <button class="btn btn-primary">Искать</button>
+                <!-- Filters and Sorting form -->
+                {% set sort_by = request.args.get('sort_by', 'date') %}
+                {% set order = request.args.get('order', 'desc') %}
+                <form method="GET" action="{{ url_for('main.home') }}" class="mb-4">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-7">
+                            <input
+                                    type="text"
+                                    name="q"
+                                    class="form-control"
+                                    placeholder="Search tweets, @author or #hashtag…"
+                                    value="{{ request.args.get('q', '') }}"
+                            >
+                        </div>
+                        <div class="col-3">
+                            <select name="sort_by" class="form-select">
+                                <option value="date" {% if sort_by==
+                                'date' %}selected{% endif %}>Sort by Date</option>
+                                <option value="likes" {% if sort_by==
+                                'likes' %}selected{% endif %}>Sort by Likes</option>
+                                <option value="comments" {% if sort_by==
+                                'comments' %}selected{% endif %}>Sort by Comments</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Apply</button>
+                        </div>
+                        <div class="col-auto">
+                            <a
+                                    href="{{ url_for('main.home', q=request.args.get('q',''), sort_by=sort_by, order=('asc' if order=='desc' else 'desc')) }}"
+                                    class="btn btn-secondary"
+                                    title="Toggle order"
+                            >
+                                Order: {% if order == 'asc' %}Ascending{% else %}Descending{% endif %}
+                            </a>
+
+                        </div>
                     </div>
                 </form>
 
-                <!-- Отображение твитов -->
+
+                <!-- Tweets list -->
                 {% for tweet in tweets %}
                 <div class="card shadow-sm mb-3 border-0.5">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="fw-bold text-primary">@{{ tweet.author.username }}</div>
-                            <small class="text-muted">{{ tweet.created_at.strftime('%H:%M %d.%m.%Y') }}</small>
+                            <small class="text-muted">
+                                {{ tweet.created_at.strftime('%H:%M %d.%m.%Y') }}
+                            </small>
                         </div>
+
                         <p class="card-text">{{ tweet.content }}</p>
 
-                        <!-- Изображение в твите -->
                         {% if tweet.image %}
-                        <img src="{{ url_for('static', filename='uploads/' + tweet.image) }}"
-                             class="img-fluid rounded mb-2">
+                        <img
+                                src="{{ url_for('static', filename='uploads/' ~ tweet.image) }}"
+                                class="img-fluid rounded mb-2"
+                        >
                         {% endif %}
 
-                        <!-- Лайки твита -->
-                        <div class="d-flex justify-content-between mt-2">
-                            <form method="POST" action="{{ url_for('tweets.like_tweet', tweet_id=tweet.id) }}">
-                                <button type="submit" class="btn btn-outline-danger btn-sm">❤️ {{ tweet.likes|length }}</button>
-                            </form>
+                        <div class="d-flex justify-content-between" style="font-size: 14px; margin-top: 1rem;">
+                            <div>
+                                <div>
+                                    <strong>Mood:</strong>
+                                    {% if tweet.sentiment == 'POSITIVE' %}
+                                    😊 Positive
+                                    {% elif tweet.sentiment == 'NEGATIVE' %}
+                                    😢 Negative
+                                    {% else %}
+                                    😐 Neutral
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <strong>Hashtags:</strong>
+                                    {% for tag in tweet.hashtags.split()[:5] %}
+                                    <a
+                                            href="{{ url_for('main.home', q=tag) }}"
+                                            class="text-decoration-none me-2"
+                                    >
+                                        #{{ tag.lstrip('#') }}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Кнопка для перехода к комментариям -->
-                        <a href="{{ url_for('tweets.view_tweet', tweet_id=tweet.id) }}" class="btn btn-outline-primary btn-sm mt-2">
-                            💬 Комментарии ({{ tweet.comments|length }})
-                        </a>
+                        <div class="d-flex justify-content-end gap-2" style="margin-top: 0.5rem;">
+                            <form
+                                    method="POST"
+                                    action="{{ url_for('tweets.like_tweet', tweet_id=tweet.id) }}"
+                            >
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    ❤️ {{ tweet.likes|length }}
+                                </button>
+                            </form>
+                            <a
+                                    href="{{ url_for('tweets.view_tweet', tweet_id=tweet.id) }}"
+                                    class="btn btn-outline-primary btn-sm"
+                            >
+                                💬 {{ tweet.comments|length }}
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% else %}
-                <div class="alert alert-info text-center shadow-sm">Пока нет твитов. Будьте первым!</div>
+                <div class="alert alert-info text-center shadow-sm">
+                    No tweets yet. Be the first!
+                </div>
                 {% endfor %}
 
             </div>

@@ -5,15 +5,22 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4>Редактировать твит</h4>
+                    <h4>Edit Tweet</h4>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="" enctype="multipart/form-data">
                         {{ form.hidden_tag() }}
+
+                        <!-- Content Field -->
                         <div class="form-group mb-3">
                             {{ form.content.label(class="form-label") }}
                             {{ form.content(class="form-control", rows=4) }}
+                            {% for error in form.content.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
                         </div>
+
+                        <!-- Image Field -->
                         <div class="form-group mb-3">
                             {{ form.image.label(class="form-label") }}
                             {{ form.image(class="form-control") }}
@@ -21,13 +28,17 @@
                             <div class="mt-2">
                                 <img src="{{ url_for('static', filename='uploads/' + tweet.image) }}"
                                      class="img-thumbnail" style="max-height: 200px;">
-                                <small class="text-muted">Текущее изображение</small>
+                                <small class="text-muted">Current image</small>
                             </div>
                             {% endif %}
+                            {% for error in form.image.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
                         </div>
+
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Сохранить</button>
-                            <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">Отмена</a>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>

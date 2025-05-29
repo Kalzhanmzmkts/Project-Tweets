@@ -4,12 +4,14 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
-                    <div class="card-header">
-                    <h4>Вход в систему</h4>
+                <div class="card-header">
+                    <h4>Login</h4>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="">
                         {{ form.hidden_tag() }}
+
+                        <!-- Username Field -->
                         <div class="form-group">
                             {{ form.username.label(class="form-control-label") }}
                             {{ form.username(class="form-control") }}
@@ -17,6 +19,8 @@
                                 <span class="text-danger">{{ error }}</span>
                             {% endfor %}
                         </div>
+
+                        <!-- Password Field -->
                         <div class="form-group">
                             {{ form.password.label(class="form-control-label") }}
                             {{ form.password(class="form-control") }}
@@ -24,13 +28,23 @@
                                 <span class="text-danger">{{ error }}</span>
                             {% endfor %}
                         </div>
+
+                        <!-- Remember Me Checkbox -->
+                        <div class="form-check mt-3">
+                            {{ form.remember(class="form-check-input") }}
+                            {{ form.remember.label(class="form-check-label") }}
+                        </div>
+
+                        <!-- Submit Button -->
                         <div class="form-group mt-3">
                             {{ form.submit(class="btn btn-primary") }}
                         </div>
                     </form>
                 </div>
+
+                <!-- Footer -->
                 <div class="card-footer text-muted">
-                    Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрируйтесь</a>
+                    Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a>
                 </div>
             </div>
         </div>

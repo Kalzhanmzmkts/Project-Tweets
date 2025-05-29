@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,28 +17,27 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.home') }}">Главная</a>
+                    <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
                 </li>
             </ul>
             <ul class="navbar-nav">
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.profile') }}">Профиль</a>
+                    <a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Выйти</a>
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.login') }}">Войти</a>
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a>
+                    <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
                 </li>
                 {% endif %}
             </ul>
         </div>
-    </div>
     </div>
 </nav>
 

@@ -7,14 +7,14 @@
                 <div class="card-body text-center">
                     <h4 class="fw-bold text-primary">@{{ current_user.username }}</h4>
                     <p class="text-muted">{{ current_user.email }}</p>
-                    <a href="{{ url_for('tweets.new_tweet') }}" class="btn btn-primary mt-3">Новый твит</a>
+                    <a href="{{ url_for('tweets.new_tweet') }}" class="btn btn-primary mt-3">New Tweet</a>
                 </div>
             </div>
         </div>
 
         <div class="col-md-8">
             <div class="card shadow-sm mb-4 border-1" style="padding: 2vh 2vh">
-                <h3>Мои твиты</h3>
+                <h3>My Tweets</h3>
                 {% for tweet in tweets %}
                 <div class="card mb-3">
                     <div class="card-body">
@@ -25,30 +25,49 @@
                             <div>
                                 <a href="{{ url_for('tweets.view_tweet', tweet_id=tweet.id) }}"
                                    class="btn btn-sm btn-outline-primary">
-                                    💬 Комментарии ({{ tweet.comments|length }})
+                                    💬 Comments ({{ tweet.comments|length }})
                                 </a>
                                 <a href="{{ url_for('tweets.edit_tweet', tweet_id=tweet.id) }}"
-                                   class="btn btn-sm btn-outline-secondary">Изменить</a>
+                                   class="btn btn-sm btn-outline-secondary">Edit</a>
                                 <form method="POST" action="{{ url_for('tweets.delete_tweet', tweet_id=tweet.id) }}"
                                       class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                 </form>
                             </div>
                         </div>
                         <p class="card-text mt-2">{{ tweet.content }}</p>
-                        {% if tweet.image %}
-                        <img src="{{ url_for('static', filename='uploads/' + tweet.image) }}"
-                             class="img-fluid rounded mb-2">
-                        {% endif %}
-                        <div class="mt-2">
-                        <span class="text-muted">
-                            ❤️ {{ tweet.likes|length }} лайков
-                        </span>
+
+                        <!-- Sentiment, hashtags, and likes — vertically -->
+                        <div style="font-size: 12px; margin-top: 10px;">
+                            <div style="margin-bottom: 4px;">
+                                <strong>Sentiment:</strong>
+                                {% if tweet.sentiment == 'POSITIVE' %}
+                                😊 Positive
+                                {% elif tweet.sentiment == 'NEGATIVE' %}
+                                😢 Negative
+                                {% else %}
+                                😐 Neutral
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <strong>Hashtags:</strong>
+                                {% for tag in tweet.hashtags.split()[:5] %}
+                                <a href="{{ url_for('main.home', q=tag) }}"
+                                   class="text-decoration-none me-2">{{ tag }}</a>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endfor %}
+                            </div>
+
+                            <div>
+                                ❤️ {{ tweet.likes|length }} likes
+                            </div>
                         </div>
                     </div>
                 </div>
                 {% else %}
-                <div class="alert alert-info">У вас пока нет твитов</div>
+                <div class="alert alert-info">You don't have any tweets yet</div>
                 {% endfor %}
             </div>
         </div>

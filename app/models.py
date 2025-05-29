@@ -1,16 +1,21 @@
+from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 from app.extensions import db
-from flask_login import UserMixin
-from datetime import datetime
+
 
 class Tweet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(280), nullable=False)
-    image = db.Column(db.String(100))
+    image = db.Column(db.String(100), nullable=True)
+    sentiment = db.Column(db.String(10), nullable=True)
+    hashtags = db.Column(db.String(150), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     likes = db.relationship('Like', backref='tweet', lazy=True, cascade='all, delete-orphan')
+    comments = db.relationship('Comment', backref='tweet', lazy=True, cascade='all, delete-orphan')
 
 
 class User(UserMixin, db.Model):
@@ -26,12 +31,19 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(280), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    tweet_id = db.Column(db.Integer, db.ForeignKey('tweet.id'), nullable=False)  # tweet_id не может быть NULL
+    tweet_id = db.Column(db.Integer, db.ForeignKey('tweet.id'), nullable=False)
 
     user = db.relationship('User', backref=db.backref('comments', lazy=True))
-    tweet = db.relationship('Tweet', backref=db.backref('comments', lazy=True))
+
+
+class Like(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    tweet_id = db.Column(db.Integer, db.ForeignKey('tweet.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
