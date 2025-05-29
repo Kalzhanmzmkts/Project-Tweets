@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
 
-            <!-- Карточка твита -->
+            <!-- Tweet Card -->
             <div class="card shadow-sm mb-4 border-1" style="padding: 2vh 2vh">
 
                 <h4 class="fw-bold text-primary">@{{ tweet.author.username }}</h4>
@@ -13,36 +13,36 @@
 
                 {% if tweet.image %}
                 <img src="{{ url_for('static', filename='uploads/' + tweet.image) }}"
-                     class="img-fluid rounded mb-2" alt="Изображение твита">
+                     class="img-fluid rounded mb-2" alt="Tweet Image">
                 {% endif %}
 
                 <div class="d-flex justify-content-between flex-column flex-lg-row"
                      style="min-height: 90px; font-size: 14px">
 
-                    <!-- Левая часть: вертикально -->
+                    <!-- Left section: vertically aligned -->
                     <div class="d-flex flex-column gap-2">
                         <div>
-                            <strong>Настроение:</strong>
+                            <strong>Mood:</strong>
                             {% if tweet.sentiment == 'POSITIVE' %}
-                            😊 Позитивное
+                            😊 Positive
                             {% elif tweet.sentiment == 'NEGATIVE' %}
-                            😢 Негативное
+                            😢 Negative
                             {% else %}
-                            😐 Нейтральное
+                            😐 Neutral
                             {% endif %}
                         </div>
                         <div>
-                            <strong>Хэштеги:</strong>
+                            <strong>Hashtags:</strong>
                             {% for tag in tweet.hashtags.split()[:5] %}
                             <a href="{{ url_for('main.home', q=tag) }}"
                                class="text-decoration-none me-2">{{ tag }}</a>
                             {% else %}
-                            <span class="text-muted">Нет хэштегов</span>
+                            <span class="text-muted">No hashtags</span>
                             {% endfor %}
                         </div>
                     </div>
 
-                    <!-- Правая часть: кнопки снизу справа -->
+                    <!-- Right section: buttons aligned at the bottom right -->
                     <div class="d-flex align-items-end gap-2 mt-3 mt-lg-0">
                         <form method="POST" action="{{ url_for('tweets.like_tweet', tweet_id=tweet.id) }}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">
@@ -51,7 +51,7 @@
                         </form>
 
                         <a href="{{ url_for('main.home') }}" class="btn btn-secondary btn-sm">
-                            Назад
+                            Back
                         </a>
                     </div>
 
@@ -60,16 +60,16 @@
 
             </div>
 
-            <!-- Комментарии -->
+            <!-- Comments -->
             <div class="card shadow-sm mb-4 border-1" style="padding: 2vh 2vh">
                 <div class="comments-section">
-                    <h5 class="mb-3">Комментарии:</h5>
+                    <h5 class="mb-3">Comments:</h5>
                     {% if current_user.is_authenticated %}
                     <form method="POST" action="{{ url_for('tweets.view_tweet', tweet_id=tweet.id) }}"
                           class="mt-4 mb-4">
                         <div class="input-group">
                             {{ form.hidden_tag() }}
-                            {{ form.content(class="form-control h-30", placeholder="Напишите комментарий...") }}
+                            {{ form.content(class="form-control h-30", placeholder="Write a comment...") }}
                             {{ form.submit(class="btn btn-primary") }}
                         </div>
                     </form>
@@ -92,7 +92,7 @@
                                     <form method="POST"
                                           action="{{ url_for('tweets.delete_comment', tweet_id=tweet.id, comment_id=comment.id) }}"
                                           class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                     </form>
                                     {% endif %}
                                 </div>
@@ -103,7 +103,7 @@
                     {% endfor %}
 
                     {% else %}
-                    <p class="alert alert-info">Нет комментариев. Будьте первым!</p>
+                    <p class="alert alert-info">No comments yet. Be the first!</p>
                     {% endif %}
                 </div>
 
